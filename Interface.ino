@@ -6,7 +6,7 @@ const int buttonPins[] = {33, 27, 12, 19}; // Order: Up, Enter, Down, Back
 #include <LiquidCrystal.h>
 const int rs = 21, en = 17, d4 = 16, d5 = 14, d6 = 32, d7 = 15;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
-const bool i2c = false;
+const bool i2c = false, activeHigh = true;
 #else
 // Declarations for Arduino Uno R3
 // *** ADD Declarations for Arduino Uno R3 *** //
@@ -15,7 +15,7 @@ const int buttonPins[] = {4, 6, 7, 5}; // Order: Up, Enter, Down, Back
 
 #include <LiquidCrustal_I2C.h>
 LiquidCrystal_I2C lcd(0x27, 20, 4);
-const bool i2c = true;
+const bool i2c = true, activeHigh = false;
 #endif
 
 const int HOME_SCREEN = 0, SCAN_PRINT = 1, ADD_PRINT = 2, REMOVE_PRINT = 3, ENROLLED_PRINTS = 4;
@@ -81,19 +81,12 @@ int getButtons() {
   int val = 0;
   for (int i = 0; i < sizeof(buttonPins) / sizeof(int); i++) {
     val = val << 1;
-
-    /*
-     * Digital read for active high input on ESP32
-     *
-    val += digitalRead(buttonPins[i]);
-    /**/
-
-    /*
-     * Digital read for active low input on Uno R3
-     * 
-     */
-    val += (digitalRead(buttonPins[i])) ? 0 : 1;
-    /**/
+    
+    if (activeHigh) {
+      val += digitalRead(buttonPins[i]);
+    } else {
+      val += (digitalRead(buttonPins[i])) ? 0 : 1;
+    }
   }
 
   return val;
